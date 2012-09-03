@@ -5,6 +5,7 @@ import redis
 import hashlib
 import os
 import cgi
+import binascii
 from M2Crypto import X509, SMIME, BIO, Rand
 
 class Commands:
@@ -47,6 +48,13 @@ class Commands:
             # Encrypt
             # The new key is generated using secure random generator provided by OpenSSL
             random_string = Rand.rand_bytes(16) # TODO: change the length of the key to support other block sizes
+            
+            # CHECK IF THIS IS REALLY NEEDED
+            print random_string
+            random_string = binascii.hexlify(random_string)
+            print random_string
+            # END CHECK
+
             key = BIO.MemoryBuffer(random_string)
             crypted_key = s.encrypt(key)
 
@@ -110,9 +118,14 @@ class Commands:
     def join(self, uid, gid):
         """Let user "uid" join group "gid" """
 
+        #TODO: the API for http GET requests doen't work with blank spaces. Fix.
+
         if rediserver.sismember("gids", gid) and rediserver.sismember("uids", uid):
             if rediserver.sadd("users_gid:"+gid, uid) \
-            and self.__addk(gid): print self.OK_MSG
+            and self.__addk(gid): 
+                print self.OK_MSG
+            else:
+                print self.KO_MSG
         return
     
     def leave(self, uid, gid):
@@ -126,7 +139,7 @@ class Commands:
     def addg(self, gid):
 	"""Create a new group"""
 
-	if rediserver.sadd("gids", gid) and self.__addk(gid):
+	if rediserver.sadd("gids", gid):
             print self.OK_MSG
         else: print self.KO_MSG
         return

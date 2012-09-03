@@ -63,10 +63,14 @@ def main():
     s.load_key(PRIVATE_KEY_FILENAME, CERT_FILENAME, passphrase_fun)
     p7 = SMIME.load_pkcs7_bio(BIO.MemoryBuffer(pkcs7))
     key = s.decrypt(p7)
+    
+    # CHECK IF THIS IS NEEDED
+    #key = binascii.unhexlify(key)
+    # END CHECK
 
     # Get the IV from the file id
     iv = file_id[-33:-1] # Take 32 chars (128 bits) from the id, excluding the last (could be NaN)
-    iv = binascii.unhexlify(iv) # Translate to binary
+    #iv = binascii.unhexlify(iv) # Translate to binary
 
     # Get the file
     clear_text = open(file_id).read() # TODO: open the real file from cvmfs
@@ -78,7 +82,7 @@ def main():
     v = b64encode(v)
 
     print v
-    
+
     return
 
 
