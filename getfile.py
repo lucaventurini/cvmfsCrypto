@@ -65,12 +65,12 @@ def main():
     key = s.decrypt(p7)
     
     # CHECK IF THIS IS NEEDED
-    #key = binascii.unhexlify(key)
+    # key = binascii.unhexlify(key)
     # END CHECK
 
     # Get the IV from the file id
     iv = file_id[-33:-1] # Take 32 chars (128 bits) from the id, excluding the last (could be NaN)
-    #iv = binascii.unhexlify(iv) # Translate to binary
+    # iv = binascii.unhexlify(iv) # Translate to binary
 
     # Get the file
     clear_text = open(file_id).read() # TODO: open the real file from cvmfs

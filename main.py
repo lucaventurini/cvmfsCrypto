@@ -47,12 +47,12 @@ class Commands:
 
             # Encrypt
             # The new key is generated using secure random generator provided by OpenSSL
-            random_string = Rand.rand_bytes(16) # TODO: change the length of the key to support other block sizes
+            random_string = Rand.rand_bytes(32) # TODO: change the length of the key to support other block sizes
             
             # CHECK IF THIS IS REALLY NEEDED
-            print random_string
+            # print random_string
             random_string = binascii.hexlify(random_string)
-            print random_string
+            # print random_string
             # END CHECK
 
             key = BIO.MemoryBuffer(random_string)
