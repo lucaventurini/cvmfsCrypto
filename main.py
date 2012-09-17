@@ -195,6 +195,7 @@ class Commands:
 def main():
     if 'GATEWAY_INTERFACE' in os.environ:
         print "Content-Type: text/plain\n"
+        # TODO: add Content-Length
         query = "scriptname" + os.environ['PATH_INFO'] # e.g.: "scriptname/listk/atlas"
         argv = query.split("/")
     else:

@@ -13,11 +13,11 @@ DEC=0
 """
 
 # encrypt
-  cipher = EVP.Cipher(alg='aes_256_cbc', key=unhexlify(test['KEY']), iv=unhexlify(test['IV']), op=enc)
-  v = cipher.update(data)
-  v = v + cipher.final()
-  v = b64encode(v)
-  return v
+cipher = EVP.Cipher(alg='aes_256_cbc', key=unhexlify(test['KEY']), iv=unhexlify(test['IV']), op=enc)
+v = cipher.update(data)
+v = v + cipher.final()
+v = b64encode(v)
+return v
 
 # decrypt
 data = b64decode(data)
@@ -41,10 +41,9 @@ def main():
     KEY_SCRIPTNAME = "main.py/"
 
     # SETTINGS for the server authentication
-    PRIVATE_KEY_FILENAME = "luventur_privkey.pem"
+    PRIVATE_KEY_FILENAME = "luventur_privkey.pem" # TODO (jblomer): generate a certificate for the server
     CERT_FILENAME = "luventurx509.cer"
 
-    print "Content-Type: text/plain\n"
     
     # Get the arguments
     query = os.environ["PATH_INFO"][1:] # remove the first "/" from PATH_INFO
@@ -55,7 +54,6 @@ def main():
     # Get the key
     command = "get/"+key_id
     pkcs7 = urllib.urlopen(KEY_SERVER_URL + KEY_SCRIPTNAME + command).read()
-
     # Decript the key
     s = SMIME.SMIME() # Prepare an SMIME object
     def passphrase_fun(self):
@@ -65,15 +63,23 @@ def main():
     key = s.decrypt(p7)
     
     # CHECK IF THIS IS NEEDED
+    # The key and the iv are currently exchanged in ascii format.
+    # Potentially, we could use binary data, but there are compatibility issues between Python and C++.
+
     # key = binascii.unhexlify(key)
+
     # END CHECK
 
     # Get the IV from the file id
     iv = file_id[-33:-1] # Take 32 chars (128 bits) from the id, excluding the last (could be NaN)
-    # iv = binascii.unhexlify(iv) # Translate to binary
+
+    # iv = binascii.unhexlify(iv) # Translate to binary (see above)
 
     # Get the file
-    clear_text = open(file_id).read() # TODO: open the real file from cvmfs
+    # N.B.: the files are stored in the subtree "data/xy",
+    # where xy are the first two hex digits of file_id
+    path = "data/" + file_id[0:2] + "/" + file_id[2:]
+    clear_text = open(path).read() # TODO: open the real file from cvmfs
 
     # Encrypt
     cipher = Cipher('aes_256_cbc', key, iv, op=ENC) # TODO: ask the type of the key ('aes_256_cbc') to the server
@@ -81,6 +87,10 @@ def main():
     v = v + cipher.final()
     v = b64encode(v)
 
+    # print "HTTP/1.1 200 OK"
+    print "Content-Type: text/plain"
+    print "Content-Length: " + str(len(v))
+    print # blank line: end of headers
     print v
 
     return
